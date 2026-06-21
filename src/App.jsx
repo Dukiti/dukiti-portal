@@ -4,17 +4,14 @@ import { Input } from '@/components/ui/input'
 import { Sidebar } from '@/components/Sidebar'
 import { ResourceCard } from '@/components/ResourceCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Icon } from '@/components/Icon'
 import { resources, categories } from '@/data/resources'
-import { useGithubRepos } from '@/lib/useGithubRepos'
+import githubRepos from '@/data/github-repos.json'
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState('all')
 
-  const { repos: githubRepos, loading: reposLoading, error: reposError } = useGithubRepos()
-
-  const allResources = useMemo(() => [...resources, ...githubRepos], [githubRepos])
+  const allResources = useMemo(() => [...resources, ...githubRepos], [])
 
   const counts = useMemo(() => {
     const c = { all: allResources.length }
@@ -84,8 +81,6 @@ export default function App() {
             <p className="mt-1 text-sm text-muted-foreground">
               {filtered.length} tai nguyen
               {query && ' khop voi "' + query + '"'}
-              {reposLoading && ' · Dang nap repo...'}
-              {reposError && ' · Loi repo: ' + reposError}
             </p>
           </div>
 

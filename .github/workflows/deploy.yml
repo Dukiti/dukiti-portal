@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '0 0 * * *'   # 00:00 UTC moi ngay
   workflow_dispatch:
 
 permissions:
@@ -24,9 +26,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: node scripts/fetch-repos.mjs
         env:
-          VITE_REPOS_PROXY_URL: ${{ secrets.VITE_REPOS_PROXY_URL }}
+          GH_REPOS_TOKEN: ${{ secrets.GH_REPOS_TOKEN }}
+      - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
