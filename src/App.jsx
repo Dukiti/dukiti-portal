@@ -3,6 +3,7 @@ import { Search, FolderSearch } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Sidebar } from '@/components/Sidebar'
 import { ResourceCard } from '@/components/ResourceCard'
+import { GroupedGrid } from '@/components/GroupedGrid'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { resources, categories } from '@/data/resources'
 import githubRepos from '@/data/github-repos.json'
@@ -85,11 +86,13 @@ export default function App() {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filtered.map((r) => (
-                <ResourceCard key={r.title} resource={r} />
-              ))}
-            </div>
+            filtered.some((r) => r.group)
+              ? <GroupedGrid items={filtered} />
+              : <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filtered.map((r) => (
+                    <ResourceCard key={r.file ?? r.title} resource={r} />
+                  ))}
+                </div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-20 text-center">
               <FolderSearch className="h-10 w-10 text-muted-foreground/50" />

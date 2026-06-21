@@ -24,48 +24,87 @@ function ghFetch(path) {
   })
 }
 
+// Trich xuat YAML frontmatter don gian (khong can thu vien)
+function parseFrontmatter(content) {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+  if (!match) return {}
+  const fm = {}
+  for (const line of match[1].split('\n')) {
+    const colon = line.indexOf(':')
+    if (colon === -1) continue
+    const key = line.slice(0, colon).trim()
+    const val = line.slice(colon + 1).trim().replace(/^["']|["']$/g, '')
+    fm[key] = val
+  }
+  return fm
+}
+
+// "build_and_tooling" -> "Build & Tooling"
+function formatCategory(str) {
+  return str
+    .replace(/_and_/g, ' & ')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/\bUi\b/, 'UI')
+}
+
 // "android-architecture" -> "Android Architecture"
 function toTitle(slug) {
   return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-// Phan tich duong dan -> { type, title, tags, icon }
-function parsePath(filePath) {
-  // filePath vi du: .ai/skills/android/architecture/android-architecture/SKILL.md
-  const parts = filePath.split('/')  // ['.ai', 'skills', 'android', 'architecture', 'android-architecture', 'SKILL.md']
-  const kind = parts[1]              // 'agents' | 'rules' | 'skills'
+// Phan tich duong dan -> { title, description, group, tags, icon }
+function parsePath(filePath, fm) {
+  const parts = filePath.split('/')  // ['.ai', kind, ...]
+  const kind  = parts[1]             // 'agents' | 'rules' | 'skills'
+
+  const name = fm.name || ''
+  const desc = fm.description || ''
 
   if (kind === 'agents') {
-    const name = parts[2]
+    const folderName = parts[2]
     return {
-      title: toTitle(name),
-      tags: ['agent', ...name.split('-').slice(0, 2)],
+      title: name ? toTitle(name) : toTitle(folderName),
+      description: desc,
+      group: 'Agents',
+      tags: ['agent'],
       icon: 'Bot',
     }
   }
 
   if (kind === 'rules') {
-    const name = parts[2]
+    const folderName = parts[2]
     return {
-      title: toTitle(name),
-      tags: ['rule', ...name.split('-').slice(0, 2)],
+      title: name ? toTitle(name) : toTitle(folderName),
+      description: desc,
+      group: 'Rules',
+      tags: ['rule'],
       icon: 'BookOpen',
     }
   }
 
   if (kind === 'skills') {
     // .ai/skills/<platform>/<category>/<name>/SKILL.md
-    const platform = parts[2] || ''   // 'android'
-    const category = parts[3] || ''   // 'architecture' | 'ui' | ...
-    const name     = parts[4] || ''   // 'android-architecture'
+    const platform = parts[2] || ''
+    const category = parts[3] || ''
+    const folderName = parts[4] || ''
+    const catLabel = formatCategory(category)
     return {
-      title: toTitle(name || category),
+      title: name ? toTitle(name) : toTitle(folderName),
+      description: desc,
+      group: 'Skills / ' + catLabel,
       tags: ['skill', platform, category].filter(Boolean),
       icon: 'Sparkles',
     }
   }
 
-  return { title: toTitle(parts[parts.length - 2] || filePath), tags: [kind], icon: 'FileText' }
+  return {
+    title: toTitle(parts[parts.length - 2] || filePath),
+    description: desc,
+    group: formatCategory(kind),
+    tags: [kind],
+    icon: 'FileText',
+  }
 }
 
 async function main() {
@@ -86,7 +125,6 @@ async function main() {
   if (!treeRes.ok) throw new Error(`Tree API ${treeRes.status}: ${await treeRes.text()}`)
   const { tree } = await treeRes.json()
 
-  // Chi lay cac file markdown ben trong .ai/
   const files = tree.filter(
     (node) => node.type === 'blob' && node.path.startsWith('.ai/') && node.path.match(/\.(md|MD)$/)
   )
@@ -104,26 +142,34 @@ async function main() {
     const data    = await contentRes.json()
     const content = Buffer.from(data.content, 'base64').toString('utf-8')
 
-    // Luu file vao public/ai-skills/
     const localPath = join(PUBLIC_DIR, file.path)
     await mkdir(dirname(localPath), { recursive: true })
     await writeFile(localPath, content)
 
-    const { title, tags, icon } = parsePath(file.path)
-    // Lay dong dau tien cua markdown lam description (bo #)
-    const firstLine = content.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '').trim()
+    const fm = parseFrontmatter(content)
+    const { title, description, group, tags, icon } = parsePath(file.path, fm)
 
     skills.push({
       title,
-      description: firstLine || file.path,
+      description,
       file: 'ai-skills/' + file.path,
       category: 'ai',
+      group,
       icon,
       tags,
     })
 
-    console.log(`  + [${tags[0]}] ${title}`)
+    console.log(`  + [${group}] ${title}`)
   }
+
+  // Sap xep: Agents -> Rules -> Skills (theo group)
+  skills.sort((a, b) => {
+    const order = ['Agents', 'Rules']
+    const ai = order.indexOf(a.group) === -1 ? 99 : order.indexOf(a.group)
+    const bi = order.indexOf(b.group) === -1 ? 99 : order.indexOf(b.group)
+    if (ai !== bi) return ai - bi
+    return a.group.localeCompare(b.group) || a.title.localeCompare(b.title)
+  })
 
   await writeFile(META_OUT, JSON.stringify(skills, null, 2) + '\n')
   console.log(`[fetch-ai-skills] Da ghi ${skills.length} entries vao ai-skills.json`)
