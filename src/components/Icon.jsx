@@ -23,6 +23,7 @@ import {
   Bot,
   Cpu,
   FileText,
+  Sparkles,
 } from 'lucide-react'
 
 const registry = {
@@ -48,6 +49,7 @@ const registry = {
   Bot,
   Cpu,
   FileText,
+  Sparkles,
 }
 
 export function Icon({ name, ...props }) {

@@ -1,9 +1,8 @@
-// Fetch tat ca file trong repo Dukiti/ai-agent (private) luc BUILD.
-// - Noi dung file -> public/ai-skills/  (FileViewer fetch truc tiep)
-// - Metadata      -> src/data/ai-skills.json  (import vao AI tab)
-//
-// Token doc tu GH_REPOS_TOKEN (GitHub Secrets), khong lo ra client.
-// Khong co token -> ghi mang rong, khong pha build.
+// Fetch .ai/ folder trong repo Dukiti/ai-agent (private) luc BUILD.
+// Cau truc repo:
+//   .ai/agents/<name>/AGENT.md
+//   .ai/rules/<name>/RULES.md
+//   .ai/skills/<platform>/<category>/<name>/SKILL.md
 
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -15,8 +14,6 @@ const META_OUT   = join(ROOT, 'src', 'data', 'ai-skills.json')
 const REPO       = 'Dukiti/ai-agent'
 const token      = process.env.GH_REPOS_TOKEN
 
-const SKIP_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.zip'])
-
 function ghFetch(path) {
   return fetch(`https://api.github.com/repos/${REPO}/${path}`, {
     headers: {
@@ -27,13 +24,48 @@ function ghFetch(path) {
   })
 }
 
-function iconForFile(name) {
-  const ext = name.split('.').pop().toLowerCase()
-  if (['md', 'txt'].includes(ext)) return 'FileText'
-  if (['json', 'yaml', 'yml', 'toml'].includes(ext)) return 'Braces'
-  if (['sh', 'bash'].includes(ext)) return 'FileTerminal'
-  if (['py'].includes(ext)) return 'FileCode'
-  return 'Bot'
+// "android-architecture" -> "Android Architecture"
+function toTitle(slug) {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// Phan tich duong dan -> { type, title, tags, icon }
+function parsePath(filePath) {
+  // filePath vi du: .ai/skills/android/architecture/android-architecture/SKILL.md
+  const parts = filePath.split('/')  // ['.ai', 'skills', 'android', 'architecture', 'android-architecture', 'SKILL.md']
+  const kind = parts[1]              // 'agents' | 'rules' | 'skills'
+
+  if (kind === 'agents') {
+    const name = parts[2]
+    return {
+      title: toTitle(name),
+      tags: ['agent', ...name.split('-').slice(0, 2)],
+      icon: 'Bot',
+    }
+  }
+
+  if (kind === 'rules') {
+    const name = parts[2]
+    return {
+      title: toTitle(name),
+      tags: ['rule', ...name.split('-').slice(0, 2)],
+      icon: 'BookOpen',
+    }
+  }
+
+  if (kind === 'skills') {
+    // .ai/skills/<platform>/<category>/<name>/SKILL.md
+    const platform = parts[2] || ''   // 'android'
+    const category = parts[3] || ''   // 'architecture' | 'ui' | ...
+    const name     = parts[4] || ''   // 'android-architecture'
+    return {
+      title: toTitle(name || category),
+      tags: ['skill', platform, category].filter(Boolean),
+      icon: 'Sparkles',
+    }
+  }
+
+  return { title: toTitle(parts[parts.length - 2] || filePath), tags: [kind], icon: 'FileText' }
 }
 
 async function main() {
@@ -45,7 +77,6 @@ async function main() {
     return
   }
 
-  // Lay danh sach tat ca file qua Git Tree API (recursive)
   const treeRes = await ghFetch('git/trees/HEAD?recursive=1')
   if (treeRes.status === 409) {
     console.warn('[fetch-ai-skills] Repo chua co commit -> ghi mang rong.')
@@ -55,11 +86,10 @@ async function main() {
   if (!treeRes.ok) throw new Error(`Tree API ${treeRes.status}: ${await treeRes.text()}`)
   const { tree } = await treeRes.json()
 
-  const files = tree.filter((node) => {
-    if (node.type !== 'blob') return false
-    const ext = '.' + node.path.split('.').pop().toLowerCase()
-    return !SKIP_EXTENSIONS.has(ext)
-  })
+  // Chi lay cac file markdown ben trong .ai/
+  const files = tree.filter(
+    (node) => node.type === 'blob' && node.path.startsWith('.ai/') && node.path.match(/\.(md|MD)$/)
+  )
 
   console.log(`[fetch-ai-skills] Tim thay ${files.length} file trong ${REPO}`)
 
@@ -68,10 +98,10 @@ async function main() {
   for (const file of files) {
     const contentRes = await ghFetch(`contents/${file.path}`)
     if (!contentRes.ok) {
-      console.warn(`  Bỏ qua ${file.path}: ${contentRes.status}`)
+      console.warn(`  Bo qua ${file.path}: ${contentRes.status}`)
       continue
     }
-    const data = await contentRes.json()
+    const data    = await contentRes.json()
     const content = Buffer.from(data.content, 'base64').toString('utf-8')
 
     // Luu file vao public/ai-skills/
@@ -79,21 +109,24 @@ async function main() {
     await mkdir(dirname(localPath), { recursive: true })
     await writeFile(localPath, content)
 
-    const fileName = file.path.split('/').pop()
+    const { title, tags, icon } = parsePath(file.path)
+    // Lay dong dau tien cua markdown lam description (bo #)
+    const firstLine = content.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '').trim()
+
     skills.push({
-      title: fileName.replace(/\.[^.]+$/, ''),   // bo extension lam title
-      description: file.path,                     // duong dan day du lam mo ta
+      title,
+      description: firstLine || file.path,
       file: 'ai-skills/' + file.path,
       category: 'ai',
-      icon: iconForFile(fileName),
-      tags: ['skill', file.path.includes('/') ? file.path.split('/')[0] : 'root'],
+      icon,
+      tags,
     })
 
-    console.log(`  + ${file.path}`)
+    console.log(`  + [${tags[0]}] ${title}`)
   }
 
   await writeFile(META_OUT, JSON.stringify(skills, null, 2) + '\n')
-  console.log(`[fetch-ai-skills] Da ghi ${skills.length} skill vao ai-skills.json`)
+  console.log(`[fetch-ai-skills] Da ghi ${skills.length} entries vao ai-skills.json`)
 }
 
 main().catch((err) => {
