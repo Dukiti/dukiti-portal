@@ -22,6 +22,7 @@ import {
   FileTerminal,
   Bot,
   Cpu,
+  FileText,
 } from 'lucide-react'
 
 const registry = {
@@ -46,6 +47,7 @@ const registry = {
   FileTerminal,
   Bot,
   Cpu,
+  FileText,
 }
 
 export function Icon({ name, ...props }) {

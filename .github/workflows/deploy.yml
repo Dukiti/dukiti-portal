@@ -29,6 +29,9 @@ jobs:
       - run: node scripts/fetch-repos.mjs
         env:
           GH_REPOS_TOKEN: ${{ secrets.GH_REPOS_TOKEN }}
+      - run: node scripts/fetch-ai-skills.mjs
+        env:
+          GH_REPOS_TOKEN: ${{ secrets.GH_REPOS_TOKEN }}
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
