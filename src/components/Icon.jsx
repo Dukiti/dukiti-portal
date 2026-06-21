@@ -20,6 +20,8 @@ import {
   Shapes,
   Link,
   FileTerminal,
+  Bot,
+  Cpu,
 } from 'lucide-react'
 
 const registry = {
@@ -42,6 +44,8 @@ const registry = {
   Shapes,
   Link,
   FileTerminal,
+  Bot,
+  Cpu,
 }
 
 export function Icon({ name, ...props }) {
