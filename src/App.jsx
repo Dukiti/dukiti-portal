@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Search, FolderSearch } from 'lucide-react'
+import { Search, FolderSearch, Github } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Sidebar } from '@/components/Sidebar'
 import { ResourceCard } from '@/components/ResourceCard'
 import { GroupedGrid } from '@/components/GroupedGrid'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { resources, categories } from '@/data/resources'
+import { resources, categories, profile } from '@/data/resources'
 import githubRepos from '@/data/github-repos.json'
 
 export default function App() {
@@ -78,7 +78,20 @@ export default function App() {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight">{activeLabel}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold tracking-tight">{activeLabel}</h1>
+              {active === 'ai' && profile.aiAgentRepo && (
+                <a
+                  href={'https://github.com/' + profile.aiAgentRepo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                  {profile.aiAgentRepo}
+                </a>
+              )}
+            </div>
             <p className="mt-1 text-sm text-muted-foreground">
               {filtered.length} tai nguyen
               {query && ' khop voi "' + query + '"'}

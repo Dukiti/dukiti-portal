@@ -4,4 +4,5 @@ export const profile = {
   location: 'Ha Noi, Vietnam',
   initials: 'DM',
   githubUser: 'Dukiti',
+  aiAgentRepo: 'Dukiti/ai-agent',
 }
