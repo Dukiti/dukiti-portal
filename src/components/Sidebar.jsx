@@ -5,12 +5,17 @@ import { profile, categories } from '@/data/resources'
 export function Sidebar({ active, onSelect, counts }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/40 p-5 md:flex">
-      <div className="mb-8 flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Icon name="LayoutDashboard" className="h-5 w-5" />
+      <a
+        href={'https://github.com/' + profile.githubUser}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mb-8 flex items-center gap-2.5 group"
+      >
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity group-hover:opacity-80">
+          <Icon name="Github" className="h-5 w-5" />
         </div>
         <span className="text-lg font-semibold tracking-tight">Dukiti Portal</span>
-      </div>
+      </a>
 
       <nav className="flex flex-col gap-1">
         {categories.map((cat) => {
