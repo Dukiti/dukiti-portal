@@ -41,12 +41,12 @@ export const resources = [
   },
   // Mục có `file` (đường dẫn trong public/) sẽ hiện nút tải file về.
   {
-    title: 'Hello Script',
-    description: 'Script mẫu — đặt file vào public/scripts/ rồi khai báo ở đây.',
-    file: 'scripts/hello.sh',
+    title: 'Zip Folder',
+    description: 'Nén folder thành .zip, tuỳ chọn đặt mật khẩu AES-256. Yêu cầu 7-Zip.',
+    file: 'scripts/zip-folder.ps1',
     category: 'script',
-    icon: 'FileCode',
-    tags: ['bash', 'sample'],
+    icon: 'FileTerminal',
+    tags: ['powershell', 'windows', '7zip', 'zip'],
   },
   // Lưu ý: mục "repos" giờ được nạp tự động từ GitHub (xem useGithubRepos),
   // nên không cần khai báo repo thủ công ở đây nữa.
