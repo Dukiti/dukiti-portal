@@ -5,21 +5,16 @@ import { Sidebar } from '@/components/Sidebar'
 import { ResourceCard } from '@/components/ResourceCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Icon } from '@/components/Icon'
-import { resources, categories, profile } from '@/data/resources'
-import { useGithubRepos } from '@/lib/useGithubRepos'
+import { resources, categories } from '@/data/resources'
+// Danh sách repo (kể cả private) được sinh lúc build bởi scripts/fetch-repos.mjs.
+import githubRepos from '@/data/github-repos.json'
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState('all')
 
-  // Nạp repo public từ GitHub và gộp vào danh sách tài nguyên tĩnh.
-  const { repos: githubRepos, loading: reposLoading, error: reposError } =
-    useGithubRepos(profile.githubUser)
-
-  const allResources = useMemo(
-    () => [...resources, ...githubRepos],
-    [githubRepos],
-  )
+  // Gộp repo GitHub (đã nạp sẵn lúc build) vào danh sách tài nguyên tĩnh.
+  const allResources = useMemo(() => [...resources, ...githubRepos], [])
 
   // Đếm số tài nguyên cho mỗi danh mục (hiển thị ở sidebar).
   const counts = useMemo(() => {
@@ -45,9 +40,6 @@ export default function App() {
       )
     })
   }, [query, active, allResources])
-
-  // Mục Repositories phụ thuộc vào dữ liệu GitHub -> hiển thị trạng thái nạp/lỗi.
-  const showRepoStatus = active === 'repos' || active === 'all'
 
   const activeLabel =
     categories.find((c) => c.id === active)?.label ?? 'Tất cả'
@@ -97,16 +89,6 @@ export default function App() {
               {filtered.length} tài nguyên
               {query && ` khớp với “${query}”`}
             </p>
-            {showRepoStatus && reposLoading && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Đang nạp repo từ GitHub…
-              </p>
-            )}
-            {showRepoStatus && reposError && (
-              <p className="mt-1 text-sm text-destructive">
-                Không nạp được repo GitHub: {reposError}
-              </p>
-            )}
           </div>
 
           {filtered.length > 0 ? (
