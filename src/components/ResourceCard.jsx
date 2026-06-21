@@ -16,11 +16,6 @@ export function ResourceCard({ resource }) {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
             <Icon name={resource.icon} className="h-5 w-5" />
           </div>
-          {isFile && (
-            <span className="font-mono text-lg text-muted-foreground break-all">
-              {resource.file.split('/').pop()}
-            </span>
-          )}
         </div>
         {isFile
           ? <FileText className="h-5 w-5 shrink-0 text-muted-foreground/50" />

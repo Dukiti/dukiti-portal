@@ -41,7 +41,7 @@ export const resources = [
   },
   // Mục có `file` (đường dẫn trong public/) sẽ hiện nút tải file về.
   {
-    title: 'Zip Folder (PowerShell)',
+    title: 'Zip Folder (.ps1)',
     description: 'Nén folder thành .zip, tuỳ chọn đặt mật khẩu AES-256. Yêu cầu 7-Zip.',
     file: 'scripts/zip-folder.ps1',
     category: 'script',
@@ -49,7 +49,7 @@ export const resources = [
     tags: ['powershell', 'windows', '7zip', 'zip'],
   },
   {
-    title: 'Zip Folder (BAT launcher)',
+    title: 'Zip Folder (.bat)',
     description: 'Click đúp chạy ngay — hỏi folder và password rồi gọi zip-folder.ps1 tự động.',
     file: 'scripts/zip-folder.bat',
     category: 'script',
