@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
-import { X, Download, Loader2 } from 'lucide-react'
+import { X, Download, Loader2, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function FileViewer({ file, title, onClose }) {
   const [content, setContent] = useState(null)
   const [error, setError] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    if (!content) return
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   const href = import.meta.env.BASE_URL + file
 
@@ -35,6 +44,9 @@ export function FileViewer({ file, title, onClose }) {
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 shrink-0">
           <span className="font-mono text-sm font-semibold truncate">{title}</span>
           <div className="flex items-center gap-2 shrink-0">
+            <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!content} aria-label="Copy">
+              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+            </Button>
             <Button variant="ghost" size="icon" asChild aria-label="Tải về">
               <a href={href} download="">
                 <Download className="h-4 w-4" />
