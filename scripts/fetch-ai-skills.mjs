@@ -47,6 +47,11 @@ async function main() {
 
   // Lay danh sach tat ca file qua Git Tree API (recursive)
   const treeRes = await ghFetch('git/trees/HEAD?recursive=1')
+  if (treeRes.status === 409) {
+    console.warn('[fetch-ai-skills] Repo chua co commit -> ghi mang rong.')
+    await writeFile(META_OUT, '[]\n')
+    return
+  }
   if (!treeRes.ok) throw new Error(`Tree API ${treeRes.status}: ${await treeRes.text()}`)
   const { tree } = await treeRes.json()
 
