@@ -27,7 +27,7 @@ export function ResourceCard({ resource }) {
           : <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary" />
         }
       </div>
-      <h3 className="font-semibold leading-tight">{resource.title}</h3>
+      <h3 className="text-lg font-semibold leading-tight">{resource.title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
         {resource.description}
       </p>
