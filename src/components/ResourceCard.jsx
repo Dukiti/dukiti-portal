@@ -17,7 +17,7 @@ export function ResourceCard({ resource }) {
             <Icon name={resource.icon} className="h-5 w-5" />
           </div>
           {isFile && (
-            <span className="font-mono text-xs text-muted-foreground break-all">
+            <span className="font-mono text-lg text-muted-foreground break-all">
               {resource.file.split('/').pop()}
             </span>
           )}
