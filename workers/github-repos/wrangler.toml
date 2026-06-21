@@ -1,0 +1,7 @@
+name = "dukiti-github-repos"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# Sau khi deploy, thêm secret bằng lệnh:
+#   npx wrangler secret put GH_TOKEN
+# rồi nhập token GitHub (quyền repo → metadata read-only)

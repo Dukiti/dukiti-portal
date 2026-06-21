@@ -6,17 +6,16 @@ import { ResourceCard } from '@/components/ResourceCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Icon } from '@/components/Icon'
 import { resources, categories } from '@/data/resources'
-// Danh sách repo (kể cả private) được sinh lúc build bởi scripts/fetch-repos.mjs.
-import githubRepos from '@/data/github-repos.json'
+import { useGithubRepos } from '@/lib/useGithubRepos'
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState('all')
 
-  // Gộp repo GitHub (đã nạp sẵn lúc build) vào danh sách tài nguyên tĩnh.
-  const allResources = useMemo(() => [...resources, ...githubRepos], [])
+  const { repos: githubRepos, loading: reposLoading, error: reposError } = useGithubRepos()
 
-  // Đếm số tài nguyên cho mỗi danh mục (hiển thị ở sidebar).
+  const allResources = useMemo(() => [...resources, ...githubRepos], [githubRepos])
+
   const counts = useMemo(() => {
     const c = { all: allResources.length }
     for (const cat of categories) {
@@ -26,7 +25,6 @@ export default function App() {
     return c
   }, [allResources])
 
-  // Lọc theo danh mục + tìm kiếm (tên, mô tả, tag).
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return allResources.filter((r) => {
@@ -41,8 +39,7 @@ export default function App() {
     })
   }, [query, active, allResources])
 
-  const activeLabel =
-    categories.find((c) => c.id === active)?.label ?? 'Tất cả'
+  const activeLabel = categories.find((c) => c.id === active)?.label ?? 'Tat ca'
 
   return (
     <div className="flex min-h-screen">
@@ -56,7 +53,7 @@ export default function App() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm tài nguyên theo tên hoặc tag…"
+                placeholder="Tim tai nguyen theo ten hoac tag..."
                 className="pl-9"
               />
             </div>
@@ -65,7 +62,6 @@ export default function App() {
         </header>
 
         <div className="px-5 py-8 md:px-8">
-          {/* Bộ lọc danh mục cho mobile (sidebar bị ẩn) */}
           <div className="mb-6 flex gap-2 overflow-x-auto pb-1 md:hidden">
             {categories.map((cat) => (
               <button
@@ -86,8 +82,10 @@ export default function App() {
           <div className="mb-6">
             <h1 className="text-2xl font-semibold tracking-tight">{activeLabel}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {filtered.length} tài nguyên
-              {query && ` khớp với “${query}”`}
+              {filtered.length} tai nguyen
+              {query && ' khop voi "' + query + '"'}
+              {reposLoading && ' · Dang nap repo...'}
+              {reposError && ' · Loi repo: ' + reposError}
             </p>
           </div>
 
@@ -100,9 +98,9 @@ export default function App() {
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-20 text-center">
               <FolderSearch className="h-10 w-10 text-muted-foreground/50" />
-              <p className="mt-4 font-medium">Không tìm thấy tài nguyên nào</p>
+              <p className="mt-4 font-medium">Khong tim thay tai nguyen nao</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Thử từ khóa khác hoặc đổi danh mục.
+                Thu tu khoa khac hoac doi danh muc.
               </p>
             </div>
           )}
