@@ -41,6 +41,7 @@ const registry = {
   Settings,
   Shapes,
   Link,
+  FileTerminal,
 }
 
 export function Icon({ name, ...props }) {
