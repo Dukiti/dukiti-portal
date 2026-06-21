@@ -19,6 +19,7 @@ import {
   Settings,
   Shapes,
   Link,
+  FileTerminal,
 } from 'lucide-react'
 
 const registry = {

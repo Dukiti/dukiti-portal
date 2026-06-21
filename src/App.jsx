@@ -6,25 +6,35 @@ import { ResourceCard } from '@/components/ResourceCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Icon } from '@/components/Icon'
 import { resources, categories, profile } from '@/data/resources'
+import { useGithubRepos } from '@/lib/useGithubRepos'
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState('all')
 
+  // Nạp repo public từ GitHub và gộp vào danh sách tài nguyên tĩnh.
+  const { repos: githubRepos, loading: reposLoading, error: reposError } =
+    useGithubRepos(profile.githubUser)
+
+  const allResources = useMemo(
+    () => [...resources, ...githubRepos],
+    [githubRepos],
+  )
+
   // Đếm số tài nguyên cho mỗi danh mục (hiển thị ở sidebar).
   const counts = useMemo(() => {
-    const c = { all: resources.length }
+    const c = { all: allResources.length }
     for (const cat of categories) {
       if (cat.id === 'all') continue
-      c[cat.id] = resources.filter((r) => r.category === cat.id).length
+      c[cat.id] = allResources.filter((r) => r.category === cat.id).length
     }
     return c
-  }, [])
+  }, [allResources])
 
   // Lọc theo danh mục + tìm kiếm (tên, mô tả, tag).
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return resources.filter((r) => {
+    return allResources.filter((r) => {
       const matchCat = active === 'all' || r.category === active
       if (!matchCat) return false
       if (!q) return true
@@ -34,7 +44,10 @@ export default function App() {
         r.tags.some((t) => t.toLowerCase().includes(q))
       )
     })
-  }, [query, active])
+  }, [query, active, allResources])
+
+  // Mục Repositories phụ thuộc vào dữ liệu GitHub -> hiển thị trạng thái nạp/lỗi.
+  const showRepoStatus = active === 'repos' || active === 'all'
 
   const activeLabel =
     categories.find((c) => c.id === active)?.label ?? 'Tất cả'
@@ -84,6 +97,16 @@ export default function App() {
               {filtered.length} tài nguyên
               {query && ` khớp với “${query}”`}
             </p>
+            {showRepoStatus && reposLoading && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Đang nạp repo từ GitHub…
+              </p>
+            )}
+            {showRepoStatus && reposError && (
+              <p className="mt-1 text-sm text-destructive">
+                Không nạp được repo GitHub: {reposError}
+              </p>
+            )}
           </div>
 
           {filtered.length > 0 ? (

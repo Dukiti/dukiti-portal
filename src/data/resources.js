@@ -6,9 +6,11 @@
 
 export const profile = {
   name: 'Dung Nguyen Minh',
-  role: 'Android / SDK Developer',
-  location: 'Ho Chi Minh City, Vietnam',
+  role: 'Developer',
+  location: 'Ha Noi, Vietnam',
   initials: 'DM',
+  // Username GitHub: mục "Repositories" sẽ tự fetch repo public của tài khoản này.
+  githubUser: 'Dukiti',
 }
 
 export const categories = [
@@ -16,7 +18,7 @@ export const categories = [
   { id: 'docs', label: 'Docs', icon: 'BookOpen' },
   { id: 'repos', label: 'Repositories', icon: 'GitBranch' },
   { id: 'tools', label: 'Dev Tools', icon: 'Wrench' },
-  { id: 'design', label: 'Design', icon: 'Palette' },
+  { id: 'script', label: 'Script', icon: 'FileTerminal' },
   { id: 'notes', label: 'Tech Notes', icon: 'StickyNote' },
 ]
 
@@ -37,22 +39,8 @@ export const resources = [
     icon: 'FileCode',
     tags: ['kotlin'],
   },
-  {
-    title: 'SDK Umbrella',
-    description: 'Repo mã nguồn chính, branch main.',
-    url: 'https://github.com/dukiti',
-    category: 'repos',
-    icon: 'Github',
-    tags: ['repo', 'core'],
-  },
-  {
-    title: 'OpenAPI Generator',
-    description: 'Sinh Retrofit client và models từ spec.',
-    url: 'https://openapi-generator.tech',
-    category: 'repos',
-    icon: 'Braces',
-    tags: ['openapi', 'codegen'],
-  },
+  // Lưu ý: mục "repos" giờ được nạp tự động từ GitHub (xem useGithubRepos),
+  // nên không cần khai báo repo thủ công ở đây nữa.
   {
     title: 'Swagger / OpenAPI',
     description: 'API specification và client config.',
