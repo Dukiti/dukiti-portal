@@ -41,12 +41,20 @@ export const resources = [
   },
   // Mục có `file` (đường dẫn trong public/) sẽ hiện nút tải file về.
   {
-    title: 'Zip Folder',
+    title: 'Zip Folder (PowerShell)',
     description: 'Nén folder thành .zip, tuỳ chọn đặt mật khẩu AES-256. Yêu cầu 7-Zip.',
     file: 'scripts/zip-folder.ps1',
     category: 'script',
     icon: 'FileTerminal',
     tags: ['powershell', 'windows', '7zip', 'zip'],
+  },
+  {
+    title: 'Zip Folder (BAT launcher)',
+    description: 'Click đúp chạy ngay — hỏi folder và password rồi gọi zip-folder.ps1 tự động.',
+    file: 'scripts/zip-folder.bat',
+    category: 'script',
+    icon: 'FileTerminal',
+    tags: ['bat', 'windows', 'launcher'],
   },
   // Lưu ý: mục "repos" giờ được nạp tự động từ GitHub (xem useGithubRepos),
   // nên không cần khai báo repo thủ công ở đây nữa.
