@@ -35,10 +35,9 @@ export function FileViewer({ file, title, onClose }) {
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 shrink-0">
           <span className="font-mono text-sm font-semibold truncate">{title}</span>
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="ghost" size="icon" asChild aria-label="Tải về">
               <a href={href} download="">
                 <Download className="h-4 w-4" />
-                Tải về
               </a>
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose} aria-label="Đóng">
